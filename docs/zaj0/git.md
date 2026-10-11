@@ -1,5 +1,7 @@
 W tym module poznasz podstawowe informacje o systemie kontroli wersji git. Omówimy commity, synchronizację z repozytorium zdalnym, pracę z gałęziami oraz współpracę przez pull requesty.
 
+Tutaj też wszytko ładnie wytłumaczone [Git and GitHub Tutorial for Beginners - YouTube](https://www.youtube.com/watch?v=tRZGeaHPoaw).
+
 ## Czym jest git?
 
 Git to rozproszony system kontroli wersji, który umożliwia śledzenie zmian w plikach, współpracę między programistami i zarządzanie kodem źródłowym w sposób efektywny i bezpieczny. Jest szeroko stosowany w projektach open-source oraz w firmach na całym świecie.
