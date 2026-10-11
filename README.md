@@ -1,3 +1,3 @@
 # python1-materials
 
-Wszystkie informacje znajdują się na stronie [https://github.com/eo-geospatial/python1-materials](https://github.com/eo-geospatial/python1-materials).
+Wszystkie informacje znajdują się na stronie [https://agh-geospatial.github.io/python1-materials](https://agh-geospatial.github.io/python1-materials).
