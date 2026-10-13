@@ -92,7 +92,7 @@ git config user.email "twoj@email.com"
 ## 🔧 3. Konfiguracja IDE (VS Code) z Dockerem i Miniforge
 
 - **Otwórz katalog projektu** w VS Code.
-- Dodaj samodzielnie 2 pliki, dodaj zawartość zgodnie z tym co poniżej i nie zapomnij zapisać zmian:
+- Stwórz samodzielnie 2 pliki, dodaj zawartość zgodnie z tym co poniżej i nie zapomnij zapisać zmian:
 
 ???- info "Plik `./Dockerfile` (z dużej litery, bez rozszerzenia, w głównym katalogu projektu)"
 
