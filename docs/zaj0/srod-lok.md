@@ -191,6 +191,4 @@ Uruchom go w kontenerze:
 python main.py
 ```
 
-Zrób zrzut ekranu (screenshot) pokazujący wynik działania tego skryptu w terminalu kontenera i wyślij go na czat 📸
-
 ---
