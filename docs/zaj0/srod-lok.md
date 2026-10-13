@@ -92,9 +92,9 @@ git config user.email "twoj@email.com"
 ## 🔧 3. Konfiguracja IDE (VS Code) z Dockerem i Miniforge
 
 - **Otwórz katalog projektu** w VS Code.
-- Zapoznaj się z widocznymi tam plikami:
+- Stwórz samodzielnie 2 pliki, dodaj zawartość zgodnie z tym co poniżej i nie zapomnij zapisać zmian:
 
-???- info "Plik `Dockerfile`"
+???- info "Plik `./Dockerfile` (z dużej litery, bez rozszerzenia, w głównym katalogu projektu)"
 
     Ten plik definiuje obraz Dockera z preinstalowanym Pythonem i condą.
 
@@ -106,7 +106,7 @@ git config user.email "twoj@email.com"
     CMD ["/bin/bash", "-l"]
     ```
 
-???- info "Plik `./.devcontainer/devcontainer.json`"
+???- info "Plik `./.devcontainer/devcontainer.json` (folder w głównym katalogu projektu (nie zapomnij o kropce na początku nazwy) i dopiero w środku plik JSON)"
 
     Ten plik konfiguruje VS Code do pracy w kontenerze Dockera z odpowiednimi rozszerzeniami.
 
