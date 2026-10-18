@@ -1,12 +1,15 @@
 ## Przypisania
 
-W Pythonie **przypisania zmiennych tworzą referencje do obiektów**, co oznacza, że zmienne działają jak wskaźniki. Zmienne nie przechowują samych wartości, lecz odnoszą się do obiektów w pamięci.
+W Pythonie **przypisania zmiennych tworzą referencje do obiektów**, co oznacza, że zmienne są nazwami wskazującymi na obiekty. Zmienne nie przechowują samych wartości, lecz odnoszą się do obiektów w pamięci.
 
 Zmienne są **tworzone automatycznie przy pierwszym przypisaniu** wartości, bez potrzeby deklarowania ich wcześniej.
 
-Przed użyciem zmiennej należy najpierw przypisać do niej wartość, w przeciwnym razie Python zgłosi błąd.
+Przed użyciem zmiennej należy najpierw przypisać do niej wartość, w przeciwnym razie Python zgłosi błąd:
+```python
+# print(nieznana)  # NameError: name 'nieznana' is not defined
+```
 
-**Rozpakowywanie** pozwala przypisać wiele wartości do zmiennych jednocześnie, np. z listy, krotki lub innej iterowalnej struktury.
+**Rozpakowywanie** pozwala przypisać wiele wartości do zmiennych jednocześnie, np. z listy, krotki lub innej iterowalnej struktury. Liczba zmiennych po lewej stronie musi być równa liczbie elementów - chyba że użyjemy `*`, który zbiera "resztę" elementów do listy.
 
 ```python
 a, b, c = [1, 2, 3]
@@ -16,6 +19,13 @@ baza, *glowne_skladniki, przyprawy = skladniki
 print(f"Baza przepisu to {baza}")
 print(f"Główne składniki to {glowne_skladniki}")
 print(f"A {przyprawy} to użyte przyprawy.")
+```
+
+Wartości, których nie potrzebujemy, zwyczajowo przypisuje się do zmiennej `_`. Rozpakowywać można też struktury zagnieżdżone - wystarczy po lewej stronie odtworzyć ich kształt:
+```python
+punkt = ('A', (10, 20), 'czerwony')
+nazwa, (x, y), _ = punkt
+print(nazwa, x, y)  # A 10 20
 ```
 
 ## 📝 Zadania
@@ -66,8 +76,10 @@ print(f"Lista a: {a}, lista b: {b}, lista c: {c}")
 ??? - note "Jakie obiekty mutowalne i niemutowalne?"
     W Pythonie obiekty dzielą się na mutowalne (zmienne) i niemutowalne (niezmienne). Kluczową różnicą między nimi jest to, czy zawartość obiektu może być zmieniona w miejscu (bez tworzenia nowego obiektu) po jego utworzeniu.
 
-    - Obiekty mutowalne: Ich zawartość może być zmieniana po utworzeniu. Zmiany są dokonywane bez tworzenia nowej referencji w pamięci. Na przykład: **listy, słowniki czy zbiory (sets)**.
-    - Obiekty niemutowalne: Nie można zmienić ich zawartości. Każda próba modyfikacji tworzy nowy obiekt. Na przykład: **liczby całkowite (integers), liczby zmiennoprzecinkowe (floats), krotki (tuples) czy łańcuchy znaków (strings)**.
+    - Obiekty mutowalne: Ich zawartość może być zmieniana po utworzeniu. Zmiany są dokonywane w tym samym obiekcie, bez tworzenia nowego. Na przykład: **listy, słowniki czy zbiory (sets)**.
+    - Obiekty niemutowalne: Nie można zmienić ich zawartości. Operacje takie jak `num + 1` tworzą nowy obiekt, a próba zmiany w miejscu (np. elementu krotki) kończy się błędem. Na przykład: **liczby całkowite (integers), liczby zmiennoprzecinkowe (floats), krotki (tuples) czy łańcuchy znaków (strings)**.
+
+    Funkcja `id(obiekt)` zwraca identyfikator obiektu, unikalny w czasie jego istnienia - jeśli dwa `id()` są równe, to jest to ten sam obiekt. To samo sprawdza operator `is`.
 
     ```python
     # Przykład z obiektem mutowalnym - lista
@@ -96,26 +108,25 @@ print(f"Lista a: {a}, lista b: {b}, lista c: {c}")
     print("Początkowa krotka:", immut_tuple)
     print("Początkowy identyfikator krotki:", id(immut_tuple))
 
-    # Próba modyfikacji krotki - TypeError
-    try:
-        immut_tuple[0] = 'zmienione'  # Spowoduje błąd
-    except TypeError as e:
-        print("\nBłąd podczas modyfikacji krotki:", e)
+    # Próba modyfikacji krotki - odkomentowanie poniższej linii spowoduje błąd:
+    # immut_tuple[0] = 'zmienione'  # TypeError: 'tuple' object does not support item assignment
     ```
 
 ## Przypisania rozszerzone i współdzielone referencje
 
-**Przypisania rozszerzone** to operatory takie jak `+=`, `-=`, `*=`, które modyfikują wartość zmiennej i przypisują wynik.
+**Przypisania rozszerzone** to operatory takie jak `+=`, `-=`, `*=`, które łączą operację z przypisaniem jej wyniku do tej samej zmiennej.
 
 ```python
 x = 5
-x += 2  # to samo co x = x + 2
+x += 2  # dla liczb działa tak samo jak x = x + 2
 print(x)
 ```
 
+Dla obiektów niemutowalnych (np. liczb) `x += 2` zawsze tworzy nowy obiekt. Dla obiektów mutowalnych (np. list) Python może zamiast tego zmodyfikować istniejący obiekt w miejscu - sprawdź w zadaniu poniżej, jakie ma to konsekwencje.
+
 ## 📝 Zadania
 
-1. Wyzwól następujący kod, wyświetl K, L, M i N. Wyjaśnij w jaki sposób konkatenacja zachowuje się inaczej od przypisania rozszerzonego.
+1. Uruchom następujący kod, wyświetl K, L, M i N. Wyjaśnij w jaki sposób konkatenacja zachowuje się inaczej od przypisania rozszerzonego.
 
 ```python
 K = [1, 2]
@@ -130,4 +141,12 @@ M += [3, 4]
 
 ## Słowa zarezerwowane
 
-**Słowa zarezerwowane** w Pythonie mają specjalne znaczenie i nie mogą być używane jako nazwy zmiennych. Przykładami takich słów są `if`, `else`, `for`, `while`, `def`, `return` itp.
+**Słowa zarezerwowane** w Pythonie mają specjalne znaczenie i nie mogą być używane jako nazwy zmiennych. Przykładami takich słów są `if`, `else`, `for`, `while`, `def`, `return`, `import`, `True`, `None` itp. Pełną listę można wyświetlić tak:
+
+```python
+import keyword
+print(keyword.kwlist)
+```
+
+!!! warning "Nazwy wbudowane"
+    Nazwy funkcji i typów wbudowanych, takie jak `print`, `list`, `str` czy `len`, **nie są** słowami zarezerwowanymi - Python pozwoli przypisać do nich wartość (np. `list = [1, 2]`). Nadpisuje to jednak oryginalną funkcję w bieżącej przestrzeni nazw, przez co późniejsze wywołanie `list("abc")` zakończy się błędem. Należy unikać takich nazw zmiennych.

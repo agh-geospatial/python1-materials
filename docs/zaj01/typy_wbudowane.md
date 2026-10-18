@@ -1,12 +1,12 @@
 ## Wprowadzenie
 W Pythonie istnieje kilka podstawowych typów wbudowanych, które pozwalają na przechowywanie i manipulowanie różnymi rodzajami danych. Do najważniejszych należą:
 
-- **Liczby (int, float, complex)** – typy liczbowe,
-- **Łańcuchy znaków (str)** – sekwencje znaków,
-- **Listy (list)** – uporządkowane kolekcje elementów,
-- **Krotki (tuple)** – niemutowalne kolekcje elementów,
-- **Słowniki (dict)** – struktury danych przechowujące pary klucz-wartość,
-- **Zbiory (set)** – nieuporządkowane kolekcje unikalnych elementów.
+- **Liczby (int, float, complex)** - typy liczbowe,
+- **Łańcuchy znaków (str)** - sekwencje znaków,
+- **Listy (list)** - uporządkowane kolekcje elementów,
+- **Krotki (tuple)** - niemutowalne kolekcje elementów,
+- **Słowniki (dict)** - struktury danych przechowujące pary klucz-wartość,
+- **Zbiory (set)** - nieuporządkowane kolekcje unikalnych elementów.
 
 ---
 
@@ -40,12 +40,16 @@ z = 1 + 2j  # complex
     print(x + y)  # Wynik: 0.3 (dokładnie)
     ```
 
-    **32-bit vs. 64-bit**
+    **Zakres i precyzja**
     
-    Python samodzielnie zarządza precyzją liczb całkowitych, ale liczby zmiennoprzecinkowe (`float`) zależą od architektury systemu:
+    Liczby całkowite (`int`) w Pythonie mają dowolną precyzję - są ograniczone jedynie dostępną pamięcią.
     
-    - **Systemy 32-bitowe** przechowują `float` jako pojedynczą precyzję (32 bity), co może prowadzić do większych błędów zaokrągleń.
-    - **Systemy 64-bitowe** używają podwójnej precyzji (64 bity), co zapewnia większą dokładność, ale nadal podlega ograniczeniom standardu IEEE 754.
+    Liczby zmiennoprzecinkowe (`float`) to zawsze liczby podwójnej precyzji (64 bity, IEEE 754), niezależnie od tego, czy system jest 32- czy 64-bitowy. Dają one około 15-17 cyfr znaczących, a największa możliwa wartość to około `1.8e308`. Szczegóły można sprawdzić przez `sys.float_info`:
+    ```python
+    import sys
+    print(sys.float_info.max)  # 1.7976931348623157e+308
+    print(sys.float_info.dig)  # 15
+    ```
 
     Jeśli kluczowa jest precyzja obliczeń, warto rozważyć użycie `decimal.Decimal` lub `fractions.Fraction`.
 
@@ -58,9 +62,32 @@ b = 3.5
 suma = a + b
 roznica = a - b
 iloczyn = a * b
-iloraz = a / b
+iloraz = a / b           # dzielenie zawsze zwraca float
+dzielenie_calk = a // 3  # dzielenie całkowite (z zaokrągleniem w dół)
 potega = a ** 2
-modulo = a % 3
+modulo = a % 3           # reszta z dzielenia
+```
+
+### Moduły matematyczne
+Bardziej zaawansowane funkcje znajdują się w modułach biblioteki standardowej, np. `math` i `random`:
+```python
+import math
+import random
+
+print(math.sqrt(16))                # Pierwiastek kwadratowy
+print(math.e)                       # Stała e
+print(random.randint(1, 10))        # Losowa liczba całkowita z zakresu 1-10
+print(random.choice(["a", "b"]))    # Losowy element z listy
+```
+
+### Rzutowanie typów
+Typ wartości sprawdzamy funkcją `type()`, a zamieniamy funkcjami o nazwach typów:
+```python
+x = 3.99
+print(type(x))   # <class 'float'>
+print(int(x))    # 3 (część ułamkowa jest odcinana)
+print(str(x))    # '3.99'
+print(float("2.5") + 1)  # 3.5
 ```
 
 ---
@@ -72,14 +99,33 @@ tekst = "Witaj, świecie!"
 print(tekst[0])  # Pierwszy znak
 print(tekst[-1])  # Ostatni znak
 print(tekst[0:5])  # Fragment łańcucha
+print(len(tekst))  # Długość łańcucha
 ```
 
-Możemy również manipulować łańcuchami:
+Możemy również manipulować łańcuchami. Metody nie zmieniają oryginalnego łańcucha, tylko zwracają nowy - aby zachować wynik, trzeba go przypisać do zmiennej:
 ```python
 print(tekst.upper())  # Wielkie litery
 print(tekst.lower())  # Małe litery
 print(tekst.replace("Witaj", "Hello"))  # Zamiana fragmentu
+
+tekst = tekst.upper()  # Nadpisanie zmiennej nowym łańcuchem
 ```
+
+Próba zmiany pojedynczego znaku kończy się błędem, ponieważ łańcuchy są niemutowalne:
+```python
+# tekst[0] = "w"  # TypeError: 'str' object does not support item assignment
+```
+
+### f-stringi
+Poprzedzenie łańcucha literą `f` pozwala wstawiać do niego wartości zmiennych i wyrażeń w nawiasach klamrowych:
+```python
+imie = "Ala"
+wiek = 21
+print(f"{imie} ma {wiek} lat, za rok będzie miała {wiek + 1}")
+```
+
+!!! tip "Jakie metody ma dany obiekt?"
+    Funkcja `dir(obiekt)` zwraca listę wszystkich atrybutów i metod obiektu, a `help(obiekt.metoda)` wyświetla jej opis.
 
 ---
 
@@ -112,9 +158,11 @@ print(lista[::-1])  # Odwrócenie kolejności elementów
 ```
 
 #### Sprawdzanie obecności elementu
+Operator `in` zwraca wartość typu `bool` (`True` lub `False`):
 ```python
-if "Python" in lista:
-    print("Element istnieje w liście!")
+lista = [1, 2, "Python"]
+print("Python" in lista)  # True
+print(5 in lista)         # False
 ```
 
 ---
@@ -131,6 +179,24 @@ print(osoba["imie"])  # Dostęp do wartości
 
 osoba["miasto"] = "Warszawa"  # Dodanie nowej pary
 print(osoba)
+
+pusty = {}                    # Pusty słownik
+print(osoba.keys())           # Wszystkie klucze
+print(osoba.values())         # Wszystkie wartości
+print("wiek" in osoba)        # Sprawdzenie, czy klucz istnieje: True
+print(osoba.get("adres"))     # Bezpieczny dostęp - None zamiast błędu
+```
+
+Wartościami w słowniku mogą być dowolne obiekty, także listy i inne słowniki. Do zagnieżdżonych elementów odwołujemy się, łącząc kolejne indeksy i klucze:
+```python
+student = {
+    "imie": "Ola",
+    "kursy": [
+        {"nazwa": "Python", "ocena": 5},
+        {"nazwa": "GIS", "ocena": 4},
+    ],
+}
+print(student["kursy"][1]["nazwa"])  # GIS
 ```
 
 ---
@@ -138,12 +204,15 @@ print(osoba)
 ## Krotki
 Krotki działają podobnie do list, ale są niemutowalne:
 ```python
-krotka = (1, 2, "Python", 3.14)
+krotka = (1, 2, "Python", 3.14, 2)
 print(krotka[1])
+print(len(krotka))       # Liczba elementów: 5
+print(krotka.count(2))   # Liczba wystąpień wartości 2: 2
+print(krotka.index("Python"))  # Indeks pierwszego wystąpienia: 2
 ```
 Próba modyfikacji krotki spowoduje błąd:
 ```python
-# krotka[1] = 5  # Błąd: nie można modyfikować elementów krotki
+# krotka[1] = 5  # TypeError: 'tuple' object does not support item assignment
 ```
 
 ---
@@ -156,6 +225,14 @@ zbior2 = {3, 4, 5, 6}
 
 print(zbior1 & zbior2)  # Część wspólna
 print(zbior1 | zbior2)  # Suma zbiorów
+print(zbior1 - zbior2)  # Różnica zbiorów
+```
+
+Zbiór można utworzyć z dowolnej sekwencji funkcją `set()` - duplikaty zostaną usunięte:
+```python
+print(set([1, 1, 2, 3, 3]))  # {1, 2, 3}
+print(set("banan"))          # {'b', 'a', 'n'} - kolejność może być inna
+pusty = set()                # Uwaga: {} tworzy pusty słownik, a nie zbiór
 ```
 
 ---
@@ -177,15 +254,15 @@ print(zbior1 | zbior2)  # Suma zbiorów
         Jest to spodziewane, zamień potęgę na `12`.
 
 4. Do zmiennej `tekst` przypisz rzutowanie wartości zmiennej `potega` na typ `string` (funkcja `str()`) 
-5. Do zmiennej `wartosc_pi` przypisz wartość liczby pi
-6. Do zmiennej `losowa` przypisz losową wartość z listy [1,2,3,4,5]
+5. Do zmiennej `wartosc_pi` przypisz wartość liczby pi (skorzystaj z modułu `math`)
+6. Do zmiennej `losowa` przypisz losową wartość z listy [1,2,3,4,5] (skorzystaj z modułu `random`)
 
 **Łańcuchy znaków**
 
 1. Nadpisz zmienną `tekst` następującym wyrażeniem: `tekst = f"Wartosc: {tekst}"`
 2. Wyświetl długość tekstu w zmiennej `tekst` i później wykorzystując wycinki wyświetl część zmiennej `tekst` o wartości „art”
 3. Wypisz wartość funkcji `dir(tekst)`
-4. Zmień cały łańcuch znaków w zmiennej `tekst` na wielkie litery, wypisz 
+4. Zmień cały łańcuch znaków w zmiennej `tekst` na wielkie litery, przypisz wynik z powrotem do zmiennej `tekst` i wypisz
 5. Spróbuj zamienić znak na pozycji 2 w łańcuchu w zmiennej `tekst` na znak p
 
     ???- warning "Pojawia Ci się błąd?"
@@ -216,6 +293,9 @@ Działania na listach:
 2. Wypisz długość zmiennej i pierwszy wyraz
 3. Sprawdź, ile razy występuje wartość 2 i wypisz
 4. Spróbuj zmienić pierwszy wyraz na wartość 2
+
+    ???- warning "Pojawia Ci się błąd?"
+        Jest to spodziewane, zapoznaj się z błędem i usuń lub zakomentuj tą linię kodu.
 
 **Zbiory**
 

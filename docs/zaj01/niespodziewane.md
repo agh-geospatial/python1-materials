@@ -24,9 +24,9 @@ print(f"X: {X}, Y: {Y}")
 ```
 
 ???- "Dlaczego tak się dzieje?"
-    - `X = L * 4` tworzy nową listę powielając zawartość `L` jako wartości skalarne
-    - `Y = [L] * 4` powiela odniesienie do listy `L`, nie tworząc nowych instancji
-    - Po zmianie elementu w `L`, efekt jest widoczny w `Y`, ale nie w `X`, ponieważ `X` zawiera wartości skopiowane
+    - `X = L * 4` tworzy nową, płaską listę z powtórzonymi **elementami** `L` (liczbami) - `X` nie zawiera samej listy `L`
+    - `Y = [L] * 4` tworzy listę zawierającą cztery referencje do **tej samej** listy `L`, nie tworząc nowych instancji
+    - Po zmianie elementu w `L` efekt jest widoczny w `Y`, ale nie w `X`, ponieważ `X` nie ma żadnego powiązania z listą `L`, a tylko z jej (niemutowalnymi) elementami
 
 ### Głębsza analiza kopiowania list
 ```python
