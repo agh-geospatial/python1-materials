@@ -26,11 +26,32 @@ print(x)  # globalny
 
 Python szuka `x` zawsze od najwęższego zakresu ku najszerszemu i zatrzymuje się przy pierwszym trafieniu.
 
+Zmienne lokalne istnieją tylko w trakcie wykonywania funkcji - po jej zakończeniu nie da się do nich odwołać z zewnątrz:
+
+```python
+def oblicz():
+    wynik = 42
+
+oblicz()
+# print(wynik)  # NameError: name 'wynik' is not defined
+```
+
 ---
 
 ## Słowo kluczowe `global`
 
-Wewnątrz funkcji przypisanie do nazwy **zawsze tworzy nową zmienną lokalną**, nawet jeśli istnieje zmienna globalna o tej samej nazwie. Żeby zmodyfikować zmienną globalną, trzeba ją jawnie zadeklarować słowem `global`.
+**Odczyt** zmiennej globalnej wewnątrz funkcji działa bez żadnych dodatkowych zabiegów:
+
+```python
+stawka_vat = 0.23
+
+def cena_brutto(netto):
+    return netto * (1 + stawka_vat)  # odczyt zmiennej globalnej - OK
+
+print(cena_brutto(100))
+```
+
+Inaczej jest z **przypisaniem**. Wewnątrz funkcji przypisanie do nazwy (w tym `+=`) sprawia, że nazwa ta jest traktowana jako lokalna w całej funkcji, nawet jeśli istnieje zmienna globalna o tej samej nazwie. Żeby zmodyfikować zmienną globalną, trzeba ją jawnie zadeklarować słowem `global`.
 
 ```python
 licznik = 0
@@ -58,34 +79,14 @@ print(licznik)  # 2
 !!! warning "Ogranicz użycie `global`"
     Zmienne globalne utrudniają testowanie i śledzenie przepływu danych. Zamiast nich lepiej przekazywać wartości przez argumenty i zwracać przez `return`. `global` może być uzasadniony np. dla liczników lub flag w małych skryptach.
 
----
-
-## Słowo kluczowe `nonlocal`
-
-`nonlocal` działa jak `global`, ale dotyczy zmiennej z **najbliższej otaczającej funkcji** (nie globalnej). Jest niezbędne, gdy chcemy zmodyfikować zmienną z funkcji zewnętrznej wewnątrz funkcji zagnieżdżonej.
-
-```python
-def zewnetrzna():
-    licznik = 0
-
-    def wewnetrzna():
-        nonlocal licznik
-        licznik += 1
-
-    wewnetrzna()
-    wewnetrzna()
-    print(licznik)  # 2
-
-zewnetrzna()
-```
-
-Bez `nonlocal` przypisanie `licznik += 1` wewnątrz `wewnetrzna` rzuciłoby `UnboundLocalError`, bo Python potraktowałby `licznik` jako zmienną lokalną.
+!!! note "A co z zakresem otaczającym (Enclosing)?"
+    Modyfikowanie zmiennych funkcji zewnętrznej z wnętrza funkcji zagnieżdżonej (słowo kluczowe `nonlocal`) omówimy razem z domknięciami na kolejnych zajęciach.
 
 ---
 
 ## 📝 Zadania
 
-Stwórz plik `python1course/zaj02/zakres_zmiennych.py` i wykonaj w nim poniższe zadania.
+Stwórz plik `python1course/zaj03/zakres_zmiennych.py` i wykonaj w nim poniższe zadania.
 
 1. Uruchom poniższy kod i wyjaśnij wynik. Następnie popraw go tak, żeby funkcja `resetuj` rzeczywiście zerowała licznik globalny.
 
@@ -99,23 +100,30 @@ Stwórz plik `python1course/zaj02/zakres_zmiennych.py` i wykonaj w nim poniższe
     print(licznik)
     ```
 
-2. Napisz funkcję `stworz_licznik()`, która używa `nonlocal` do zarządzania wewnętrznym stanem. Funkcja powinna zwracać dwie inne funkcje: `zwieksz` i `pobierz`, które odpowiednio inkrementują i odczytują wewnętrzny licznik.
-
-    Przykład użycia:
-    ```python
-    zwieksz, pobierz = stworz_licznik()
-    zwieksz()
-    zwieksz()
-    zwieksz()
-    print(pobierz())  # 3
-    ```
-
-3. Napisz funkcję `stworz_konto(saldo_poczatkowe)`, która zwraca trzy funkcje: `wplac(kwota)`, `wyplac(kwota)` i `sprawdz()`. Każda z nich operuje na wewnętrznym saldzie konta poprzez `nonlocal`. Funkcja `wyplac` powinna wypisać ostrzeżenie, jeśli saldo byłoby ujemne po wypłacie.
+2. Poniższy kod działa, ale opiera się na zmiennej globalnej. Przepisz funkcje `wplac` i `wyplac` tak, żeby nie używały `global` - niech przyjmują aktualne saldo jako argument i zwracają nowe saldo. Funkcja `wyplac` powinna wypisać ostrzeżenie i zwrócić niezmienione saldo, jeśli po wypłacie byłoby ono ujemne.
 
     ```python
-    wplac, wyplac, sprawdz = stworz_konto(100)
+    saldo = 100
+
+    def wplac(kwota):
+        global saldo
+        saldo += kwota
+
+    def wyplac(kwota):
+        global saldo
+        saldo -= kwota
+
     wplac(50)
     wyplac(30)
-    print(sprawdz())  # 120
-    wyplac(200)       # Ostrzeżenie: niewystarczające środki
+    print(saldo)  # 120
+    ```
+
+    Po zmianach wywołanie powinno wyglądać tak:
+    ```python
+    saldo = 100
+    saldo = wplac(saldo, 50)
+    saldo = wyplac(saldo, 30)
+    print(saldo)  # 120
+    saldo = wyplac(saldo, 200)  # Ostrzeżenie: niewystarczające środki
+    print(saldo)  # 120
     ```
