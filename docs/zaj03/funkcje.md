@@ -60,7 +60,7 @@ print(oblicz_bmi.__doc__)
 help(oblicz_bmi)
 ```
 
-Instrukcja `raise` celowo zgłasza błąd i przerywa działanie funkcji - wyjątki omówimy dokładnie na kolejnych zajęciach. Zapis `masa: float` i `-> float` to adnotacje typów, opisane na końcu tej strony.
+Instrukcja `raise` celowo zgłasza błąd i przerywa działanie funkcji - wyjątki omówimy dokładnie w części [Wyjątki](wyjatki.md). Zapis `masa: float` i `-> float` to adnotacje typów, opisane na końcu tej strony.
 
 !!! tip "Konwencja"
     Najczęściej stosowane style docstringów to **Google style** (jak powyżej) i **NumPy style**. Ważne, żeby w ramach jednego projektu trzymać się jednego stylu.
