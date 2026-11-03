@@ -3,7 +3,7 @@ name: Publish docs
 on:
   push:
     branches:
-      - iiad-zaj03
+      - iiad-zaj04
 
 permissions:
   contents: write
