@@ -136,7 +136,7 @@ Stwórz plik `python1course/zaj04/lambda.py` i wykonaj w nim poniższe zadania.
 
     - sortowanie książek rosnąco według roku wydania (`sorted`),
     - filtrację książek wydanych po roku **1950** (`filter`) - wynik zamień na listę,
-    - transformację listy do listy samych tytułów (`map`) - wynik zamień na listę.
+    - transformację **oryginalnej** listy książek do listy samych tytułów (`map`) - wynik zamień na listę.
 
 3. Masz listę uczniów: `["Anna Kowalska", "Jan Nowak", "Piotr Wiśniewski", "Ewa Zielińska"]`. Napisz kod, który:
 

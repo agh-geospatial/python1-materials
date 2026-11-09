@@ -112,7 +112,7 @@ def zmierz_czas(unit="seconds"):
 
 @zmierz_czas(unit="microseconds")
 def suma_kwadratow(n):
-    return sum(i * i for i in range(n))
+    return sum([i * i for i in range(n)])
 
 print(suma_kwadratow(10_000))
 ```
@@ -121,19 +121,26 @@ print(suma_kwadratow(10_000))
 
 ## Typowe zastosowania
 
-??? - note "Logowanie"
-    Automatyczne logowanie wywołań funkcji.
+Przykład, który przyda się w zadaniu: logowanie wywołań.
 
-    ```python
-    from functools import wraps
+```python
+from functools import wraps
 
-    def loguj(funkcja):
-        @wraps(funkcja)
-        def wrapper(*args, **kwargs):
-            print(f"Wywołano: {funkcja.__name__} | args={args}, kwargs={kwargs}")
-            return funkcja(*args, **kwargs)
-        return wrapper
-    ```
+def loguj(funkcja):
+    @wraps(funkcja)
+    def wrapper(*args, **kwargs):
+        print(f"Wywołano: {funkcja.__name__} | args={args}, kwargs={kwargs}")
+        return funkcja(*args, **kwargs)
+    return wrapper
+
+@loguj
+def dodaj(a, b):
+    return a + b
+
+print(dodaj(3, 5))
+# Wywołano: dodaj | args=(3, 5), kwargs={}
+# 8
+```
 
 ??? - note "Sprawdzanie warunku przed wywołaniem"
     Dekorator może przerwać wywołanie, zgłaszając wyjątek.
