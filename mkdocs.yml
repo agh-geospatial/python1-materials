@@ -59,3 +59,7 @@ nav:
       - 🔥 Wstęp - funkcje: zaj03/funkcje.md
       - 🔥 Zakres zmiennych: zaj03/zakres_zmiennych.md
       - 🔥 Wyjątki: zaj03/wyjatki.md
+      - ⚙️ Funkcje jako obiekty: zaj04/funkcje_jako_obiekty.md
+      - ⚙️ Lambda: zaj04/lambda.md
+      - ⚙️ Domknięcia: zaj04/domkniecia.md
+      - ⚙️ Dekoratory: zaj04/dekoratory.md
