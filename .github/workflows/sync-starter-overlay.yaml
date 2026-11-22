@@ -1,0 +1,204 @@
+name: Sync starter overlay
+
+# Ręczny overlay ze startera do repo studentów (Classroom 50).
+# Repo studenta = {repo_prefix}{github_login}
+# Jeden login = jeden job w matrix (Re-run failed jobs = retry per student).
+# Wymaga secreta STUDENT_SYNC_TOKEN (read starter + write student repos).
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: "GitHub org studentów / startera"
+        required: true
+        default: "agh-geospatial"
+        type: string
+      starter_repo:
+        description: "Repozytorium startera"
+        required: true
+        default: "python1-starter"
+        type: string
+      source_branch:
+        description: "Branch w starterze ze źródłem plików"
+        required: true
+        default: "oop"
+        type: string
+      repo_prefix:
+        description: "Prefix nazwy repo studenta (bez loginu)"
+        required: true
+        default: "python-1-2627-cwiczenia-python-1-zimowy-2526-"
+        type: string
+      github_logins:
+        description: "Loginy GitHub (jeden na linię; # komentarz)"
+        required: true
+        type: string
+      paths:
+        description: "Ścieżki do skopiowania (spacja-separated, względem roota startera)"
+        required: true
+        default: "main_oop.py python1course/__init__.py python1course/zaj05 .gitignore .gitattributes"
+        type: string
+      pr_branch:
+        description: "Branch PR w repo studenta"
+        required: true
+        default: "sync/oop-starter"
+        type: string
+      pr_title:
+        description: "Tytuł PR"
+        required: true
+        default: "Sync: OOP starter (main_oop + zaj05)"
+        type: string
+      dry_run:
+        description: "Tylko pokaż plan/diff, bez push i bez PR"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      logins: ${{ steps.parse.outputs.logins }}
+    steps:
+      - name: Verify sync token
+        env:
+          STUDENT_SYNC_TOKEN: ${{ secrets.STUDENT_SYNC_TOKEN }}
+        run: |
+          if [ -z "${STUDENT_SYNC_TOKEN}" ]; then
+            echo "::error::Missing secret STUDENT_SYNC_TOKEN (needs read on starter + write on student repos)."
+            exit 1
+          fi
+
+      - name: Parse logins into matrix JSON
+        id: parse
+        env:
+          RAW_LOGINS: ${{ inputs.github_logins }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$RAW_LOGINS" \
+            | sed 's/\r$//' \
+            | sed 's/#.*$//' \
+            | awk '{$1=$1}; NF' \
+            > logins.txt
+
+          if [ ! -s logins.txt ]; then
+            echo "::error::No GitHub logins after parsing input."
+            exit 1
+          fi
+
+          echo "Parsed $(wc -l < logins.txt | tr -d ' ') login(s):"
+          cat logins.txt
+
+          # Compact JSON array for strategy.matrix.login
+          logins_json="$(jq -R -s -c 'split("\n") | map(select(length > 0))' logins.txt)"
+          {
+            echo "logins<<EOF"
+            echo "$logins_json"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  overlay:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        login: ${{ fromJson(needs.prepare.outputs.logins) }}
+    name: ${{ matrix.login }}
+    steps:
+      - name: Checkout starter source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.org }}/${{ inputs.starter_repo }}
+          ref: ${{ inputs.source_branch }}
+          token: ${{ secrets.STUDENT_SYNC_TOKEN }}
+          path: starter
+
+      - name: Sync overlay for one student
+        env:
+          GH_TOKEN: ${{ secrets.STUDENT_SYNC_TOKEN }}
+          ORG: ${{ inputs.org }}
+          REPO_PREFIX: ${{ inputs.repo_prefix }}
+          LOGIN: ${{ matrix.login }}
+          PATHS: ${{ inputs.paths }}
+          PR_BRANCH: ${{ inputs.pr_branch }}
+          PR_TITLE: ${{ inputs.pr_title }}
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
+          STARTER_REPO: ${{ inputs.starter_repo }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          git config --global user.name "python1-materials-sync"
+          git config --global user.email "python1-sync@users.noreply.github.com"
+
+          starter_root="$GITHUB_WORKSPACE/starter"
+          repo="${REPO_PREFIX}${LOGIN}"
+          full="${ORG}/${repo}"
+
+          echo "Target: ${full}"
+
+          # shellcheck disable=SC2086
+          for path in $PATHS; do
+            if [ ! -e "$starter_root/$path" ]; then
+              echo "::error::Path not found in ${STARTER_REPO}@${SOURCE_BRANCH}: $path"
+              exit 1
+            fi
+          done
+
+          if ! gh repo view "$full" >/dev/null 2>&1; then
+            echo "::error::Repo not found: $full"
+            exit 1
+          fi
+
+          workdir="$GITHUB_WORKSPACE/student"
+          rm -rf "$workdir"
+          gh repo clone "$full" "$workdir" -- --depth 1
+
+          cd "$workdir"
+          default_branch="$(gh repo view "$full" --json defaultBranchRef --jq '.defaultBranchRef.name')"
+          git fetch origin "$default_branch"
+          git checkout -B "$PR_BRANCH" "origin/$default_branch"
+
+          # shellcheck disable=SC2086
+          for path in $PATHS; do
+            src="$starter_root/$path"
+            dst="$workdir/$path"
+            if [ -d "$src" ]; then
+              rm -rf "$dst"
+              mkdir -p "$(dirname "$dst")"
+              cp -a "$src" "$dst"
+            else
+              mkdir -p "$(dirname "$dst")"
+              cp -a "$src" "$dst"
+            fi
+          done
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes for $full (already up to date)."
+            exit 0
+          fi
+
+          echo "Changes for $full:"
+          git diff --cached --stat
+
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY_RUN: would commit/push/PR for $full"
+            exit 0
+          fi
+
+          git commit -m "Add overlay from ${STARTER_REPO}@${SOURCE_BRANCH}."
+          git push -u origin "$PR_BRANCH" --force
+
+          existing_pr="$(gh pr list --repo "$full" --head "$PR_BRANCH" --base "$default_branch" --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$existing_pr" ]; then
+            echo "Updated existing PR #${existing_pr}: https://github.com/${full}/pull/${existing_pr}"
+          else
+            body="$(printf 'Overlay ze startera `%s@%s`.\n\nSkopiowane ścieżki:\n```\n%s\n```\n' \
+              "$STARTER_REPO" "$SOURCE_BRANCH" "$PATHS")"
+            url="$(gh pr create --repo "$full" --base "$default_branch" --head "$PR_BRANCH" --title "$PR_TITLE" --body "$body")"
+            echo "Created PR: $url"
+          fi
