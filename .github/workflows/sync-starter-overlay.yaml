@@ -133,6 +133,8 @@ jobs:
 
           git config --global user.name "python1-materials-sync"
           git config --global user.email "python1-sync@users.noreply.github.com"
+          # Fine-grained PAT: gh API działa, ale git clone potrzebuje credential helpera
+          gh auth setup-git
 
           starter_root="$GITHUB_WORKSPACE/starter"
           repo="${REPO_PREFIX}${LOGIN}"
@@ -149,15 +151,17 @@ jobs:
           done
 
           if ! gh repo view "$full" >/dev/null 2>&1; then
-            echo "::error::Repo not found: $full"
+            echo "::error::Repo not found (or token has no access): $full"
             exit 1
           fi
 
           workdir="$GITHUB_WORKSPACE/student"
           rm -rf "$workdir"
-          gh repo clone "$full" "$workdir" -- --depth 1
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${full}.git" "$workdir"
 
           cd "$workdir"
+          # Nie zostawiaj tokenu w origin URL w logach / configu
+          git remote set-url origin "https://github.com/${full}.git"
           default_branch="$(gh repo view "$full" --json defaultBranchRef --jq '.defaultBranchRef.name')"
           git fetch origin "$default_branch"
           git checkout -B "$PR_BRANCH" "origin/$default_branch"
@@ -191,7 +195,10 @@ jobs:
           fi
 
           git commit -m "Add overlay from ${STARTER_REPO}@${SOURCE_BRANCH}."
-          git push -u origin "$PR_BRANCH" --force
+          # Push z tokenem w URL (origin jest już bez secreta)
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${full}.git" \
+            "HEAD:refs/heads/${PR_BRANCH}" --force
+          git branch --set-upstream-to="origin/${PR_BRANCH}" "$PR_BRANCH" 2>/dev/null || true
 
           existing_pr="$(gh pr list --repo "$full" --head "$PR_BRANCH" --base "$default_branch" --state open --json number --jq '.[0].number // empty')"
           if [ -n "$existing_pr" ]; then
