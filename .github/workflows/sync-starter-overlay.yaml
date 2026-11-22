@@ -29,7 +29,7 @@ on:
         default: "python-1-2627-cwiczenia-python-1-zimowy-2526-"
         type: string
       github_logins:
-        description: "Loginy GitHub (jeden na linię; # komentarz)"
+        description: "Loginy GitHub - linie / spacje / przecinki / taby (Excel OK); # komentarz"
         required: true
         type: string
       paths:
@@ -77,10 +77,14 @@ jobs:
           RAW_LOGINS: ${{ inputs.github_logins }}
         run: |
           set -euo pipefail
-          printf '%s\n' "$RAW_LOGINS" \
-            | sed 's/\r$//' \
+          # Excel / UI Actions często wkleja jedną linię albo CR/LF/tab/przecinki.
+          # Rozbijamy po wszystkim, co nie jest znakiem loginu GitHub.
+          printf '%s' "$RAW_LOGINS" \
+            | tr -d '\r' \
             | sed 's/#.*$//' \
-            | awk '{$1=$1}; NF' \
+            | tr ',\t; ' '\n\n\n\n' \
+            | tr -s '\n' '\n' \
+            | sed '/^$/d' \
             > logins.txt
 
           if [ ! -s logins.txt ]; then
@@ -89,9 +93,8 @@ jobs:
           fi
 
           echo "Parsed $(wc -l < logins.txt | tr -d ' ') login(s):"
-          cat logins.txt
+          cat -A logins.txt
 
-          # Compact JSON array for strategy.matrix.login
           logins_json="$(jq -R -s -c 'split("\n") | map(select(length > 0))' logins.txt)"
           {
             echo "logins<<EOF"
