@@ -109,7 +109,7 @@ jobs:
     name: ${{ matrix.login }}
     steps:
       - name: Checkout starter source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ inputs.org }}/${{ inputs.starter_repo }}
           ref: ${{ inputs.source_branch }}
