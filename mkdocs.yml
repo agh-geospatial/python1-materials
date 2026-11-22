@@ -63,3 +63,10 @@ nav:
       - ⚙️ Lambda: zaj04/lambda.md
       - ⚙️ Domknięcia: zaj04/domkniecia.md
       - ⚙️ Dekoratory: zaj04/dekoratory.md
+  - Programowanie obiektowe:
+      - 🧱 Po co OOP: zaj05/obiektowe_poco.md
+      - 🧱 Klasy i instancje: zaj05/klasy.md
+      - 🧱 Metody i właściwości: zaj05/metody.md
+      - 🧱 Dziedziczenie: zaj05/dziedziczenie.md
+      - 🧱 `__str__` i `__repr__`: zaj05/przeciazanie.md
+      - 🧱📝 Zadania (fundament): zaj05/zadania.md
